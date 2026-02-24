@@ -45,7 +45,7 @@ def create_waypoints(flight_plan: dict):
         y = wps[i]["lng"]
         coordinates.append((x, y))
 
-    print(coordinates)
+    #print(coordinates)
 
     # Find the max and min x and y 
     list_of_x, list_of_y = zip(*coordinates) 
@@ -53,8 +53,8 @@ def create_waypoints(flight_plan: dict):
     x_min, x_max = min(list_of_x), max(list_of_x)
     y_min, y_max = min(list_of_y), max(list_of_y)
 
-    print(x_min, x_max)
-    print(y_min, y_max)
+    #print(x_min, x_max)
+    #print(y_min, y_max)
 
     big_square_length = x_min + x_max 
 
@@ -75,20 +75,20 @@ def create_waypoints(flight_plan: dict):
     y_top    = center_y + half_side
 
     center = (center_x, center_y)
-    print("the center is", center)
+    #print("the center is", center)
 
     dist = []
-    print(len(coordinates))
+    #print(len(coordinates))
     for i in range(len(coordinates)):
         d = math.dist(center, coordinates[i])
         dist.append(abs(d))
 
     max_dist_from_center = max(dist)
-    print(max_dist_from_center)
+    #print(max_dist_from_center)
 
     # Big square bounds 
     x_min_square = center_x - max_dist_from_center
-    print("x_left", x_min_square, "\n")
+    #print("x_left", x_min_square, "\n")
     x_max_square = center_x + max_dist_from_center
     y_min_square = center_y - max_dist_from_center
     y_max_square = center_y + max_dist_from_center 
@@ -134,7 +134,6 @@ def create_waypoints(flight_plan: dict):
             # right -> left in longitude
             lon = end_lon
             while lon >= start_lon - 1e-12:
-                print(waypoints_out, order, dlon, lon)
                 ##waypoints_out.append({"order": order, "lat": lat, "lng": lon})
                 waypoints_out.append((order,lat,lon))
                 order += 1
@@ -143,8 +142,8 @@ def create_waypoints(flight_plan: dict):
         lat += dlat
         row += 1
 
-    print("Generated waypoints:", len(waypoints_out))
-    print(waypoints_out, "\n")
+    #print("Generated waypoints:", len(waypoints_out))
+    #print(waypoints_out, "\n")
 
     # Bounds checking 
 
@@ -155,8 +154,8 @@ def create_waypoints(flight_plan: dict):
             waypoints_filtered.append({"order": count, "lat": x, "lng": y})
             count += 1
 
-    print("Filtered waypoints:", len(waypoints_filtered))
-    print(waypoints_filtered)
+    #print("Filtered waypoints:", len(waypoints_filtered))
+    #print(waypoints_filtered)
 
     return {
             "missionId": flight_plan["missionId"],

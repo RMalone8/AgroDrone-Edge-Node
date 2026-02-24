@@ -12,16 +12,30 @@ DEVICE_TOKEN = os.getenv("DEVICE_TOKEN")
 
 while True:
     # check for any new flightplans
-    response = requests.get(BACKEND_URL + "/flightplan",
+    response = requests.get(BACKEND_URL + "/flightplan/latest",
                 headers={"Authorization": "Bearer " + DEVICE_TOKEN})
 
-    # TODO
-    # check if the backend indicated that there were any changes to the mission, then process and flag to be sent to the drone
+    data = response.json()
 
-    wp = waypoints.create_waypoints(response.json())
+    with open("waypoints.json", "r") as f:
+        past_waypoints = json.load(f)
 
-    # write to file to be offloaded to drone
-    with open("waypoints.json", "w") as f:
-        json.dump(wp, f, indent=4)
+    # checking if this mission already exists. If not, create waypoints for it
+    if past_waypoints["missionId"] != data["missionId"]:
+    
+        wp = waypoints.create_waypoints(response.json())
 
-    time.sleep(60) # wait for a minute
+        print("Waypoints created!")
+
+        # write to file to be offloaded to drone
+        with open("waypoints.json", "w") as f:
+            json.dump(wp, f, indent=4)
+
+        # TODO
+        # need to set some flag so that this new mission can be sent to the drone
+        
+    else:
+        print("Mission Already Exists")
+
+    print("Sleeping...")
+    time.sleep(15) # wait for a minute
