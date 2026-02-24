@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import requests
 import time
+import waypoints
 
 load_dotenv()
 
@@ -13,13 +14,14 @@ while True:
     # check for any new flightplans
     response = requests.get(BACKEND_URL + "/flightplan",
                 headers={"Authorization": "Bearer " + DEVICE_TOKEN})
-    
 
     # TODO
-    # add Siara's script to process the waypoints
+    # check if the backend indicated that there were any changes to the mission, then process and flag to be sent to the drone
+
+    wp = waypoints.create_waypoints(response.json())
 
     # write to file to be offloaded to drone
-    with open("data.json", "w") as f:
-        json.dump(response.json(), f, indent=4)
+    with open("waypoints.json", "w") as f:
+        json.dump(wp, f, indent=4)
 
     time.sleep(60) # wait for a minute
