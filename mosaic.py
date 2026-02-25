@@ -5,7 +5,7 @@ import requests
 
 load_dotenv()
 
-BACKEND_URL = 'http://localhost:8787'
+BACKEND_URL = os.getenv("BACKEND_URL")
 DEVICE_TOKEN = os.getenv("DEVICE_TOKEN")
 
 def main():
