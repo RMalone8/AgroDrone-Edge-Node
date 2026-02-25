@@ -1,12 +1,16 @@
-[UNIT]
+[Unit]
 Description=AgroDrone telemetry sending service
 After=network-online.target
 StartLimitIntervalSec=0
 
-[SERVICE]
+[Service]
 Type=simple
 Restart=always
-RestartSec=1
+RestartSec=5
 User=sr-design
-ExecStart=/usr/bin/python /home/sr-design/AgroDrone-Edge-Node/src/telemetry.py
-EnvironmentFile=/home/sr-design/AgroDrone-Edge-Node/.env
+ExecStart=/usr/bin/python3 telemetry.py
+WorkingDirectory=/home/sr-design/AgroDrone-Edge-Node/src
+EnvironmentFile=.env
+
+[Install]
+WantedBy=multi-user.target
