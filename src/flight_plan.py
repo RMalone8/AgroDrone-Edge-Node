@@ -9,33 +9,34 @@ load_dotenv()
 
 BACKEND_URL = os.getenv("BACKEND_URL")
 DEVICE_TOKEN = os.getenv("DEVICE_TOKEN")
+WAYPOINT_PATH = os.getenv("WAYPOINT_PATH")
 
-while True:
-    # check for any new flightplans
-    response = requests.get(BACKEND_URL + "/flightplan/latest",
-                headers={"Authorization": "Bearer " + DEVICE_TOKEN})
+def main():
+    while True:
+        # check for any new flightplans
+        response = requests.get(BACKEND_URL + "/flightplan/latest",
+                    headers={"Authorization": "Bearer " + DEVICE_TOKEN})
 
-    data = response.json()
+        data = response.json()
 
-    with open("waypoints.json", "r") as f:
-        past_waypoints = json.load(f)
+        if os.path.exists(WAYPOINT_PATH):
+            with open(WAYPOINT_PATH, "r") as f:
+                past_waypoints = json.load(f)
+            # checking if this mission already exists. If not, create waypoints for it
+            if past_waypoints["missionId"] != data["missionId"]:
+                waypoint_processing(data) 
+        else:
+            waypoint_processing(data)
 
-    # checking if this mission already exists. If not, create waypoints for it
-    if past_waypoints["missionId"] != data["missionId"]:
-    
-        wp = waypoints.create_waypoints(response.json())
+        time.sleep(120) # sleep for two minutes
 
-        print("Waypoints created!")
+def waypoint_processing(data: dict):
+    # create waypoints
+    wp = waypoints.create_waypoints(data)
 
-        # write to file to be offloaded to drone
-        with open("waypoints.json", "w") as f:
-            json.dump(wp, f, indent=4)
+    # write to file to be offloaded to drone
+    with open(WAYPOINT_PATH, "w") as f:
+        json.dump(wp, f, indent=4)
 
-        # TODO
-        # need to set some flag so that this new mission can be sent to the drone
-        
-    else:
-        print("Mission Already Exists")
-
-    print("Sleeping...")
-    time.sleep(15) # wait for a minute
+if __name__ == "__main__":
+    main()
