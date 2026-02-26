@@ -8,7 +8,7 @@ load_dotenv()
 
 BACKEND_URL = os.getenv("BACKEND_URL")
 DEVICE_TOKEN = os.getenv("DEVICE_TOKEN")
-TELEMETRY_PATH = "../telemetry.json"
+TELEMETRY_PATH = os.getenv("TELEMETRY_PATH")
 
 while True:
     # read the telemetry file
