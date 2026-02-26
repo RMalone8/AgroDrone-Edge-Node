@@ -1,0 +1,15 @@
+[Unit]
+Description=AgroDrone flightplan retrieving service
+After=network-online.target
+
+[Service]
+Type=simple
+User=sr-design
+WorkingDirectory=/home/sr-design/AgroDrone-Edge-Node/src
+EnvironmentFile=/home/sr-design/AgroDrone-Edge-Node/src/.env
+ExecStart=/usr/bin/python3 mosaic.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
