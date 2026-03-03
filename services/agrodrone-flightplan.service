@@ -1,3 +1,4 @@
+# etc/systemd/system/agrodrone-flightplan.service
 [Unit]
 Description=AgroDrone flightplan retrieving service
 After=network-online.target
@@ -8,7 +9,7 @@ Type=simple
 Restart=always
 RestartSec=5
 User=sr-design
-ExecStart=/usr/bin/python3 flightplan.py
+ExecStart=/usr/bin/python3 flight_plan.py
 WorkingDirectory=/home/sr-design/AgroDrone-Edge-Node/src
 EnvironmentFile=.env
 

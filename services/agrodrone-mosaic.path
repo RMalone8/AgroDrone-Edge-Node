@@ -1,3 +1,4 @@
+# etc/systemd/system/agrodrone-mosaic.path
 [Unit]
 Description=Trigger for processing the image data and sending it to the cloud
 

@@ -1,3 +1,4 @@
+# etc/systemd/system/agrodrone-flightplan-upload.path
 [Unit]
 Description=Trigger for sending the flight plan to the onboard Pi
 
