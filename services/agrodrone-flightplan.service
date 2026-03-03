@@ -11,7 +11,7 @@ RestartSec=5
 User=sr-design
 ExecStart=/usr/bin/python3 flight_plan.py
 WorkingDirectory=/home/sr-design/AgroDrone-Edge-Node/src
-EnvironmentFile=.env
+EnvironmentFile=/home/sr-design/AgroDrone-Edge-Node/.env
 
 [Install]
 WantedBy=multi-user.target
