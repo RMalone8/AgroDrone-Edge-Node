@@ -19,12 +19,17 @@ def main():
 
         data = response.json()
 
+        print("received flight plan data, checking if it's new...")
+
         if os.path.exists(WAYPOINT_PATH):
             with open(WAYPOINT_PATH, "r") as f:
                 past_waypoints = json.load(f)
             # checking if this mission already exists. If not, create waypoints for it
             if past_waypoints["missionId"] != data["missionId"]:
+                print("processing new flight plan of missionId: ", data["missionId"])
                 waypoint_processing(data) 
+            else:
+                print("already processed flight plan of missionId: ", data["missionId"])
         else:
             waypoint_processing(data)
 
@@ -32,7 +37,10 @@ def main():
 
 def waypoint_processing(data: dict):
     # create waypoints
+    start = time.time()
     wp = waypoints.create_waypoints(data)
+    end = time.time()
+    print(f"Total time to generate waypoints: {end-start} seconds")
 
     # write to file to be offloaded to drone
     with open(WAYPOINT_PATH, "w") as f:
