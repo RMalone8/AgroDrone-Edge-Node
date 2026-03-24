@@ -1,13 +1,14 @@
 import json
 from dotenv import load_dotenv
 import os
-import requests
+import paho.mqtt.client as mqtt
 
 load_dotenv()
 
-BACKEND_URL = os.getenv("BACKEND_URL")
-DEVICE_TOKEN = os.getenv("DEVICE_TOKEN")
+MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
 TELEMETRY_PATH = os.getenv("TELEMETRY_PATH")
+TOPIC = "telemetry"
 
 def main():
     # read the telemetry file
@@ -16,16 +17,18 @@ def main():
             telemetry = json.load(f)
     except Exception as e:
         print(f"Error Opening Telemetry File at {TELEMETRY_PATH}: ", e)
+        return
 
-    # send telemetry
+    # publish telemetry to MQTT broker
     try:
-        response = requests.post(BACKEND_URL + "/telemetry",
-                    headers={"Authorization": "Bearer " + DEVICE_TOKEN},
-                    json=telemetry)
+        client = mqtt.Client()
+        client.connect(MQTT_HOST, MQTT_PORT)
+        result = client.publish(TOPIC, json.dumps(telemetry))
+        result.wait_for_publish()
+        client.disconnect()
+        print(f"Telemetry published to {MQTT_HOST}:{MQTT_PORT} on topic '{TOPIC}'")
     except Exception as e:
-        print("Error Sending Telemetry to Backend: ", e)
-
-    print(response, response.status_code)
+        print("Error Publishing Telemetry to MQTT: ", e)
 
 if __name__ == '__main__':
     main()

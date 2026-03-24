@@ -1,50 +1,50 @@
 import json
 from dotenv import load_dotenv
 import os
-import requests
-import time
+import paho.mqtt.client as mqtt
 import waypoints
 
 load_dotenv()
 
-BACKEND_URL = os.getenv("BACKEND_URL")
-DEVICE_TOKEN = os.getenv("DEVICE_TOKEN")
+MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
 WAYPOINT_PATH = os.getenv("WAYPOINT_PATH")
 
-def main():
-    while True:
-        # check for any new flightplans
-        response = requests.get(BACKEND_URL + "/flightplan/latest",
-                    headers={"Authorization": "Bearer " + DEVICE_TOKEN})
+def on_connect(client, _userdata, _flags, rc):
+    if rc == 0:
+        print("Connected to MQTT broker, subscribing to flightplan topic...")
+        client.subscribe("flightplan")
+    else:
+        print(f"Failed to connect to MQTT broker, return code: {rc}")
 
-        data = response.json()
-
-        print("received flight plan data, checking if it's new...")
+def on_message(_client, _userdata, msg):
+    try:
+        data = json.loads(msg.payload.decode())
+        print("Received flight plan, checking if it's new...")
 
         if os.path.exists(WAYPOINT_PATH):
             with open(WAYPOINT_PATH, "r") as f:
                 past_waypoints = json.load(f)
-            # checking if this mission already exists. If not, create waypoints for it
-            if past_waypoints["missionId"] != data["missionId"]:
-                print("processing new flight plan of missionId: ", data["missionId"])
-                waypoint_processing(data) 
-            else:
-                print("already processed flight plan of missionId: ", data["missionId"])
-        else:
-            waypoint_processing(data)
+            if past_waypoints["missionId"] == data["missionId"]:
+                print("Flight plan already processed, skipping.")
+                return
 
-        time.sleep(120) # sleep for two minutes
+        print("Processing new flight plan of missionId:", data["missionId"])
+        wp = waypoints.create_waypoints(data)
+        with open(WAYPOINT_PATH, "w") as f:
+            json.dump(wp, f, indent=4)
 
-def waypoint_processing(data: dict):
-    # create waypoints
-    start = time.time()
-    wp = waypoints.create_waypoints(data)
-    end = time.time()
-    print(f"Total time to generate waypoints: {end-start} seconds")
+    except Exception as e:
+        print("Error processing flight plan message:", e)
 
-    # write to file to be offloaded to drone
-    with open(WAYPOINT_PATH, "w") as f:
-        json.dump(wp, f, indent=4)
+def main():
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    client.connect(MQTT_HOST, MQTT_PORT)
+    print(f"Listening for flight plans on {MQTT_HOST}:{MQTT_PORT}...")
+    client.loop_forever()
 
 if __name__ == "__main__":
     main()
